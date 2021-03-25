@@ -1,12 +1,12 @@
-#Scheduled Scripts
-##Corner Stones
+# Scheduled Scripts
+## Corner Stones
 The corner stones of all this work relies on:
 * 2.iOS_TagsNUsers.sh
 * 2.MacOS_TagsNUsers.sh
 
 Unlike the JAMF API where you ask about a particular machine for data the Mosyle API is queried for ALL data of a type (ios, mac, appletv.)  The scripts above make that query and save them to tab delimited files for future usage by the scripts below.  I do this daily at midnight..  I've thought about doing it twice a day, but haven't gotten a good reason to do so.
 
-##What they Do
+## What they Do
 All of the scripts here run scheduled on a Mac in my office.  There jobs are:
 * Filling in Asset Tags based on Incident IQ Asset tag data
   *iOS\_TagsNAssets.sh  <-iPads
@@ -27,10 +27,10 @@ All of the scripts here run scheduled on a Mac in my office.  There jobs are:
   *62.CyberStudentsiPadsoutofInventoryComplianceQuery.sh
   *91.EmailiPadComplinanceScoffs-CYBER.sh
   
-##Folders
+## Folders
 The folders each item is in represents when the script is scheduled to run.  While this is inconseqencial for the public posting of this code it helps me to remember what needs updated as time allows.
 
-##External programs called
+## External programs called
 * _/usr/local/Smillieware/bin/sendEmail_ Perl script written by Written by: Brandon Zehm <caspian@dotconf.net> which I use in a ton of places.  Its a quick and dirty way to send some emails to an internally trusted domain server.  https://github.com/mogaal/sendemail
 * _/usr/local/bin/slacktee.sh_  Script to send output to a Slack Channel.  https://github.com/coursehero/slacktee
 
