@@ -20,9 +20,12 @@ LOG="/usr/local/Smillieware/Logs/iOS_TagsNnames.log"
 source /tmp/Someplace/.MosyleAPI
 APIKey="$MOSYLE_API_key"
 
-#this file is sourced outside of Mosyle and this script.  Supplied
-#by another server.
-FileFromMikoOfLostSouls="/Volumes/GSDAuto/FromIIQ/noaccessipads.csv"
+####File with IncidentIQ Keys in the form of:
+# apitoken="S0M3KeY"
+# siteid="IIQ_SiteID"
+# baseurl="https://YourSite.incidentiq.com/api/v1.0
+source /tmp/Someplace/.incidentIQ
+#apitoken, siteid, and baseurl all come from the source file above
 
 #These files are created by the nightly run of 2.iOS_TagsNUsers.sh
 TEMPOUTPUTFILE_Stu="/tmp/Mosyle_active_iOS_Tagz_StudentiPads.txt"
@@ -117,7 +120,15 @@ ParseIt() {
 	ENROLLMENT_TYPE=$(echo "$line" | cut -f 7 -d$'\t')
 }
 
+#Query Asset Group and return relative serials.  Save to /tmp/MissingiPads.txt
+IIQ_MissingiPads() {
+	#THIS IS WHAT IM TRYING TO FIGURE OUT
+	Auth=$(echo "Authorization: Bearer $apitoken")
+	Query="$baseurl/assets/?$s=1000"
+	content="{\"OnlyShowDeleted\":false,\"Filters\":[{\"Facet\":\"View\",\"Id\":\"a10a7ea5-3004-eb11-9fb4-2818784aec2c\"}],\"FilterByViewPermission\":true}"
 
+	curl -s -k -H "SiteId: $siteid" -H "$Auth" -H "Client: ApiClient" -X POST -d "$content" "$Query" -H "Content-Type: application/json" | grep "SerialNumber\":" | cut -d ':' -f 2 | cut -d ',' -f 1 | tr -d \" > /tmp/MissingiPads.txt
+}
 
 
 ###############################
@@ -135,8 +146,8 @@ if [ ! -s "$TEMPOUTPUTFILE_Stu" ]; then
 elif [ ! -s "$TEMPOUTPUTFILE_Limbo" ]; then
 	log_line "$TEMPOUTPUTFILE_Limbo is missing.  Can't continue."
 	exit 1
-elif [ ! -s "$FileFromMikoOfLostSouls" ]; then
-	log_line "$FileFromMikoOfLostSouls is missing.  Can't continue."
+elif [ ! -s "/tmp/MissingiPads.txt" ]; then
+	log_line "/tmp/MissingiPads.txt is missing.  Can't continue."
 	exit 1
 fi
 
@@ -145,23 +156,7 @@ if [ -s "$SlackItInfo" ]; then
 	rm -Rf "$SlackItInfo"
 fi
 
-#Test to make sure GSD Auto is available to us.  If not try to
-#mount it.  Still no go?  Fail.
-if df |grep -q 'auto1.gatewayk12.net/GSDAuto'; then
-	#We have a mount get the file.
-	log_line "GSDAuto is mounted.  Will grab file from Miko."
-else
-	log_line "GSDAuto is NOT mounted.  Will try."
-	Mount_GSDAuto
-	sleep 5
 
-	if df |grep -q 'auto1.gatewayk12.net/GSDAuto'; then
-		log_line "GSDAuto is mounted.  Will grab file from Miko."
-	else
-		log_line "GSDAuto still not found.  Can't continue."
-		exit 1.
-	fi
-fi
 
 
 
@@ -172,7 +167,18 @@ fi
 KnownLostDevices=$(grep "Lost" < "$TEMPOUTPUTFILE_Stu")
 
 
-for Device in $(cat "$FileFromMikoOfLostSouls" | awk 'NR > 1 { print }' | sed "s/\"//g"); do
+exec 3< /tmp/MissingiPads.txt
+
+until [ $done ]
+do
+    read <&3 myline
+    if [ $? != 0 ]; then
+        done=1
+        continue
+    fi
+
+	#Set line to Device variable
+	Device="$myline"
 	
 	#Strip any extra carriages	
 	Device=$(echo "$Device" | tr -d "[:space:]")
