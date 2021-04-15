@@ -12,4 +12,8 @@ jcsmillie(at)gatewayk12.org
 
 # What is this Stuff?
 The *Misc_Scripts* folder is jsut one off stuff I wrote to do things.  Its interesting to read, but not really prime time.  *Scheduled* are actually deployed scripts which I have running on a Mac in my office which performs daily tasks.  See Readme in folder for a better explaination.
+
+
+#Shout Out
+Special thanks to Miko Brown (IT Director of Gateway School District) and Mosyle Support for their help in getting these things to work.
  
